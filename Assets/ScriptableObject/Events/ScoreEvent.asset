@@ -8,10 +8,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1586c18fea544814aaa5a51cc3422342, type: 3}
-  m_Name: PlayerData
+  m_Script: {fileID: 11500000, guid: 2cf0f626350a3da4d9117cd78c237361, type: 3}
+  m_Name: ScoreEvent
   m_EditorClassIdentifier: 
-  MAX_FORCE_LENGTH: 1200
-  startJumpForce: {x: 300, y: 600}
-  additionalJumpForce: {x: 0, y: 20}
-  hulkForce: {x: 0, y: -50}

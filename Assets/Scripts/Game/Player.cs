@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class Player : MonoBehaviour {
 	public enum STATES {
-		IDLING,
 		LANDING,
 		JUMPING,
 		FALLING
 	}
 
 	public PlayerData data;
-
+	public GameEvent ScoreEvent;
+	public GameEvent PerfectEvent;
+	public GameObject DeadFX;
 
 	// Use this for initialization
 	private float forceLength;
@@ -20,21 +22,26 @@ public class Player : MonoBehaviour {
 	private float startY;
 	private float previousY;
 	private float halfWayY;
+	private Animator animator;
 	void Start () {
-		this.rigBody2D = this.gameObject.GetComponent<Rigidbody2D>();
+		this.rigBody2D = GetComponent<Rigidbody2D>();
+		this.animator = GetComponent<Animator>();
 		this.forceLength = 0;
-		this.state = STATES.IDLING;
-		this.startY = this.previousY = this.halfWayY = this.transform.position.y;
+		this.SetState(STATES.LANDING);
 	}
 
 	void SetState(STATES state) {
 		this.state = state;
 		switch(state) {
 			case STATES.LANDING:
+				animator.ResetTrigger("Jump");
+				animator.SetTrigger("Land");
 				this.forceLength = 0;
 				break;
 
 			case STATES.JUMPING:
+				animator.ResetTrigger("Land");
+				animator.SetTrigger("Jump");
 				this.startY = this.previousY = this.transform.position.y;
 				break;
 
@@ -68,19 +75,23 @@ public class Player : MonoBehaviour {
 	private void OnCollisionEnter2D(Collision2D other) {
 		if(other.gameObject.tag.Equals("Ground")) {
 			SetState(STATES.LANDING);
+			ScoreEvent.Raise();
+		} else if(other.gameObject.tag.Equals("PerfectZone")) {
+			SetState(STATES.LANDING);
+			PerfectEvent.Raise();
+		} else if (other.gameObject.tag.Equals("DeadZone")) {
+			Vector2 pos = this.transform.position;
+			GameObject.Instantiate(this.DeadFX, pos, Quaternion.identity);
+			gameObject.SetActive(false);
 		}
 	}
 
 	void Update() {
 		if(IsFalling()) {
-			if(this.transform.position.y <= this.halfWayY) {
-				this.rigBody2D.AddForce(data.hulkForce);
-				Debug.Log("Add Hulk Force");
-			}
+			this.rigBody2D.AddForce(data.hulkForce);
 		} else if(IsJumping()) {
 			if(this.previousY > this.transform.position.y) {
 				SetState(STATES.FALLING);
-				this.halfWayY = (this.previousY + this.startY)/2;
 			}
 			this.previousY = this.transform.position.y;
 		}
