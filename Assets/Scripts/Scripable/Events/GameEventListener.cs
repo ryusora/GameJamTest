@@ -24,7 +24,4 @@ public class GameEventListener : MonoBehaviour
         Response.Invoke();
     }
 
-    public void OnEventRaisedWithInt(int param) {
-
-    }
 }

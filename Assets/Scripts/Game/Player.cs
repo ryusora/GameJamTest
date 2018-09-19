@@ -13,21 +13,20 @@ public class Player : MonoBehaviour {
 	public PlayerData data;
 	public GameEvent ScoreEvent;
 	public GameEvent PerfectEvent;
+	public GameEvent HitGroundEvent;
 	public GameObject DeadFX;
 
 	// Use this for initialization
 	private float forceLength;
 	private Rigidbody2D rigBody2D;
 	private STATES state;
-	private float startY;
 	private float previousY;
-	private float halfWayY;
 	private Animator animator;
 	void Start () {
 		this.rigBody2D = GetComponent<Rigidbody2D>();
 		this.animator = GetComponent<Animator>();
 		this.forceLength = 0;
-		this.SetState(STATES.LANDING);
+		this.SetState(STATES.FALLING);
 	}
 
 	void SetState(STATES state) {
@@ -42,7 +41,7 @@ public class Player : MonoBehaviour {
 			case STATES.JUMPING:
 				animator.ResetTrigger("Land");
 				animator.SetTrigger("Jump");
-				this.startY = this.previousY = this.transform.position.y;
+				this.previousY = this.transform.position.y;
 				break;
 
 			case STATES.FALLING:
@@ -76,6 +75,7 @@ public class Player : MonoBehaviour {
 		if(other.gameObject.tag.Equals("Ground")) {
 			SetState(STATES.LANDING);
 			ScoreEvent.Raise();
+			HitGroundEvent.Raise();
 		} else if(other.gameObject.tag.Equals("PerfectZone")) {
 			SetState(STATES.LANDING);
 			PerfectEvent.Raise();
