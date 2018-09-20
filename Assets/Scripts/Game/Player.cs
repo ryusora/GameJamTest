@@ -22,6 +22,7 @@ public class Player : MonoBehaviour {
 	private STATES state;
 	private float previousY;
 	private Animator animator;
+
 	void Start () {
 		this.rigBody2D = GetComponent<Rigidbody2D>();
 		this.animator = GetComponent<Animator>();

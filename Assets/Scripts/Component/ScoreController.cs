@@ -24,5 +24,6 @@ public class ScoreController : MonoBehaviour {
 
 	void UpdateScoreText() {
 		scoreText.text = scoreData.GetScore().ToString();
+		scoreText.gameObject.GetComponent<Animator>().SetTrigger("Scoring");
 	}
 }
