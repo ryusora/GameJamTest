@@ -8,10 +8,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1586c18fea544814aaa5a51cc3422342, type: 3}
-  m_Name: PlayerData
+  m_Script: {fileID: 11500000, guid: 2ee30265a7e1dbf4fad08c963c8378d6, type: 3}
+  m_Name: PowerChangedEvent
   m_EditorClassIdentifier: 
-  maxForce: {x: 300, y: 1500}
-  dropForce: {x: 0, y: -100}
-  speed: 1
-  forceRatio: 0.74584806

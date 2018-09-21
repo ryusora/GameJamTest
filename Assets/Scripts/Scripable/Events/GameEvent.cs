@@ -6,15 +6,8 @@ using UnityEditor;
 #endif
 
 
-[CreateAssetMenu]
+[CreateAssetMenu(fileName = "GameEvent", menuName = "Scriptable/GameEvent")]
 public class GameEvent : ScriptableObject {
-#if UNITY_EDITOR
-    [MenuItem("Menu/Scriptable/GameEvent")]
-    public static void CreateAsset()
-    {
-        ScriptableObjectUtility.CreateAsset<GameEvent>();
-    }
-#endif
 	private readonly List<GameEventListener> eventListeners = 
 		new List<GameEventListener>();
 

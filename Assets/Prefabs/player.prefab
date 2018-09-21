@@ -30,7 +30,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1586899402887496
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,6 +253,9 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: efda84d31834a34438a0a3ec1e1a80aa, type: 2}
   ScoreEvent: {fileID: 11400000, guid: 519dd11139f42524b9262f35d206b7c1, type: 2}
   PerfectEvent: {fileID: 11400000, guid: ed226a69192f7e54796e31ae8549a514, type: 2}
+  HitGroundEvent: {fileID: 11400000, guid: 2aab0811af0b95e4590ebbf5379175f7, type: 2}
+  PowerChangedEvent: {fileID: 11400000, guid: d43e1e8bb0b575841b860afa91a5018c, type: 2}
+  DeadFX: {fileID: 1019367851248298, guid: e0dc5b72df981d64faf324ea00c9569c, type: 2}
 --- !u!114 &114825452628135320
 MonoBehaviour:
   m_ObjectHideFlags: 1

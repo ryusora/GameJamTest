@@ -14,10 +14,13 @@ public class InputController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(Input.GetMouseButtonDown(0)) {
-			player.StartJump();
+			player.Ready();
+			player.SetForceRatio(0);
 		}
 		else if(Input.GetMouseButton(0)) {
-			player.ContinueJumping();
+			player.IncreaseForceRatio();
+		} else if(Input.GetMouseButtonUp(0)) {
+			player.StartJump();
 		}
 	}
 }

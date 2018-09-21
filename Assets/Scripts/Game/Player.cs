@@ -6,14 +6,16 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 	public enum STATES {
 		LANDING,
+		READY, // READY to jump
 		JUMPING,
-		FALLING
+		FALLING,
 	}
 
 	public PlayerData data;
 	public GameEvent ScoreEvent;
 	public GameEvent PerfectEvent;
 	public GameEvent HitGroundEvent;
+	public FloatEvent PowerChangedEvent;
 	public GameObject DeadFX;
 
 	// Use this for initialization
@@ -22,7 +24,6 @@ public class Player : MonoBehaviour {
 	private STATES state;
 	private float previousY;
 	private Animator animator;
-
 	void Start () {
 		this.rigBody2D = GetComponent<Rigidbody2D>();
 		this.animator = GetComponent<Animator>();
@@ -34,38 +35,62 @@ public class Player : MonoBehaviour {
 		this.state = state;
 		switch(state) {
 			case STATES.LANDING:
+				animator.ResetTrigger("Fall");
 				animator.ResetTrigger("Jump");
+				animator.ResetTrigger("Ready");
 				animator.SetTrigger("Land");
 				this.forceLength = 0;
 				break;
 
 			case STATES.JUMPING:
+				animator.ResetTrigger("Fall");
+				animator.ResetTrigger("Ready");
 				animator.ResetTrigger("Land");
 				animator.SetTrigger("Jump");
 				this.previousY = this.transform.position.y;
 				break;
 
 			case STATES.FALLING:
+				animator.ResetTrigger("Ready");
+				animator.ResetTrigger("Land");
+				animator.ResetTrigger("Jump");
+				animator.SetTrigger("Fall");
+				break;
+			
+			case STATES.READY:
+				animator.ResetTrigger("Fall");
+				animator.ResetTrigger("Land");
+				animator.ResetTrigger("Jump");
+				animator.SetTrigger("Ready");
 				break;
 		}
 		Debug.Log("Set State: " + state.ToString());
 	}
 
+	public void Ready() {
+		SetState(STATES.READY);
+	}
+
 	public void StartJump() {
-		if(IsLanding()) {
+		if(IsReady()) {
 			SetState(STATES.JUMPING);
-			AddJumpForce(this.data.startJumpForce);
+			AddJumpForce(this.data.maxForce * this.data.forceRatio);
 		}
 	}
 
-	public void ContinueJumping() {
-		if(IsJumping() && this.forceLength < this.data.MAX_FORCE_LENGTH)
-			AddJumpForce(this.data.additionalJumpForce);
+	public void SetForceRatio(float value) {
+		data.forceRatio = Mathf.Min(value, 1);
+		PowerChangedEvent.Raise(data.forceRatio);
+	}
+
+	public void IncreaseForceRatio() {
+		SetForceRatio(data.forceRatio + data.speed * Time.deltaTime);
 	}
 
 	public bool IsJumping() { return this.state == STATES.JUMPING; }
 	public bool IsFalling() { return this.state == STATES.FALLING; }
 	public bool IsLanding() { return this.state == STATES.LANDING; }
+	public bool IsReady() { return this.state == STATES.READY; }
 
 	void AddJumpForce(Vector2 force) {
 		this.forceLength += force.magnitude;
@@ -89,7 +114,7 @@ public class Player : MonoBehaviour {
 
 	void Update() {
 		if(IsFalling()) {
-			this.rigBody2D.AddForce(data.hulkForce);
+			this.rigBody2D.AddForce(data.dropForce);
 		} else if(IsJumping()) {
 			if(this.previousY > this.transform.position.y) {
 				SetState(STATES.FALLING);
