@@ -8,12 +8,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1586c18fea544814aaa5a51cc3422342, type: 3}
-  m_Name: PlayerData
+  m_Script: {fileID: 11500000, guid: 0c4f0602e4b96204b87557f8338a3f9b, type: 3}
+  m_Name: CameraPositionChanged
   m_EditorClassIdentifier: 
-  maxForce: {x: 300, y: 1500}
-  dropForce: {x: 0, y: -100}
-  minForceRatio: 0.4
-  speed: 1
-  forceRatio: 0
-  color: {r: 0.20518868, g: 0.77309805, b: 0.8207547, a: 1}

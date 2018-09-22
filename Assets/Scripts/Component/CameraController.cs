@@ -5,16 +5,21 @@ using UnityEngine;
 public class CameraController : MonoBehaviour {
 	public Transform follower;
 	public Vector3 distanceToFollower;
-	public float smoothValue = 0.05f;
-	private Coroutine chasingCoroutine = null;
+	public float smoothValue = 0.5f;
+	public Vector3Event PositionChangedEvent; 
+	public GameEvent DoneChasingEvent;
+	private Coroutine coroutine = null;
 	private 
 	// Use this for initialization
 	void Start () {
 	}
 
 	public void StartShaking() {
-		StartCoroutine(Shaking());
+		if(coroutine != null)
+			StopCoroutine(coroutine);
+		coroutine = StartCoroutine(Shaking());
 	}
+
 	IEnumerator Shaking() {
 		float timer = 0.25f;
 		float shakeValue = 0.15f;
@@ -32,11 +37,17 @@ public class CameraController : MonoBehaviour {
 
 	IEnumerator ChaseToFollower(){
 		Vector3 destPos = follower.position + distanceToFollower;
-		Vector3 velocity = Vector3.zero;
-		while(destPos != transform.position) {
-			transform.position = Vector3.SmoothDamp(transform.position, destPos, ref velocity, smoothValue);
+		float distance = (destPos - transform.position).normalized.magnitude;
+		float ticker = 0;
+		Vector3 oldPos = transform.position;
+		while(Vector3.Distance(destPos, transform.position) > 0.01f) {
+			ticker += Time.deltaTime;
+			transform.position = Vector3.Lerp(oldPos, destPos, Mathf.Min(ticker/distance));
+			PositionChangedEvent.Raise(transform.position);
 			yield return null;
 		}
 		Debug.Log("Done Chasing Follower");
+		DoneChasingEvent.Raise();
+		coroutine = null;
 	}
 }

@@ -9,14 +9,20 @@ public class Player : MonoBehaviour {
 		READY, // READY to jump
 		JUMPING,
 		FALLING,
+		DEAD,
+		MOVING,
+		IDLE
 	}
 
 	public PlayerData data;
+	public GameObject DeadFX;
+	public SpriteRenderer spriteRenderer;
+	[Space]
 	public GameEvent ScoreEvent;
 	public GameEvent PerfectEvent;
 	public GameEvent HitGroundEvent;
 	public FloatEvent PowerChangedEvent;
-	public GameObject DeadFX;
+	public GameEvent GameOverEvent;
 
 	// Use this for initialization
 	private float forceLength;
@@ -24,6 +30,7 @@ public class Player : MonoBehaviour {
 	private STATES state;
 	private float previousY;
 	private Animator animator;
+	private Vector3 destPos;
 	void Start () {
 		this.rigBody2D = GetComponent<Rigidbody2D>();
 		this.animator = GetComponent<Animator>();
@@ -31,40 +38,87 @@ public class Player : MonoBehaviour {
 		this.SetState(STATES.FALLING);
 	}
 
+	private void OnEnable() {
+		spriteRenderer.color = data.color;
+	}
+
+	void StartMovingToCenter() {
+		StartCoroutine(MoveToCenter());
+	}
+
+	IEnumerator MoveToCenter() {
+		yield return new WaitForSeconds(0.5f);
+		// float distance = (destPos - transform.position).normalized.magnitude;
+		// Vector3 oldPos = transform.position;
+		// while(Mathf.Abs(destPos.x - transform.position.x) > 0.1f) {
+		// 	Debug.Log("[Distance] " + Mathf.Abs(destPos.x - transform.position.x));
+		// 	if(IsDead()) {
+		// 		Debug.Log("Break Move To Center");
+		// 		yield break; // return when dead
+		// 	}
+		// 	if(!IsMoving()) {
+		// 		SetState(STATES.MOVING);
+		// 	}
+		// 	ticker += Time.deltaTime;
+		// 	Vector3 newPos = Vector3.Lerp(oldPos, destPos, Mathf.Min(ticker/distance, 1));
+		// 	transform.Translate(newPos.x - transform.position.x, 0, 0);
+		// 	animator.ResetTrigger("Move");
+		// 	animator.SetTrigger("Move");
+		// 	yield return null;
+		// }
+		SetState(STATES.IDLE);
+	}
+
 	void SetState(STATES state) {
+		if(this.state == state) return;
+
+		ResetAllTriggers();
 		this.state = state;
 		switch(state) {
+			case STATES.IDLE:
+				animator.SetTrigger("Idle");
+				break;
+
 			case STATES.LANDING:
-				animator.ResetTrigger("Fall");
-				animator.ResetTrigger("Jump");
-				animator.ResetTrigger("Ready");
 				animator.SetTrigger("Land");
 				this.forceLength = 0;
+				SetForceRatio(0);
+				HitGroundEvent.Raise();
+				StartMovingToCenter();
 				break;
 
 			case STATES.JUMPING:
-				animator.ResetTrigger("Fall");
-				animator.ResetTrigger("Ready");
-				animator.ResetTrigger("Land");
 				animator.SetTrigger("Jump");
 				this.previousY = this.transform.position.y;
 				break;
 
 			case STATES.FALLING:
-				animator.ResetTrigger("Ready");
-				animator.ResetTrigger("Land");
-				animator.ResetTrigger("Jump");
 				animator.SetTrigger("Fall");
 				break;
 			
 			case STATES.READY:
-				animator.ResetTrigger("Fall");
-				animator.ResetTrigger("Land");
-				animator.ResetTrigger("Jump");
 				animator.SetTrigger("Ready");
 				break;
+
+			case STATES.DEAD:
+				Vector2 pos = transform.position;
+				GameObject.Instantiate(DeadFX, pos, Quaternion.identity);
+				gameObject.SetActive(false);
+				GameOverEvent.Raise();
+				break;
+
+			case STATES.MOVING:
+				break;
 		}
-		Debug.Log("Set State: " + state.ToString());
+	}
+
+	void ResetAllTriggers() {
+		animator.ResetTrigger("Ready");
+		animator.ResetTrigger("Land");
+		animator.ResetTrigger("Jump");
+		animator.ResetTrigger("Fall");
+		animator.ResetTrigger("Move");
+		animator.ResetTrigger("Idle");
 	}
 
 	public void Ready() {
@@ -74,7 +128,7 @@ public class Player : MonoBehaviour {
 	public void StartJump() {
 		if(IsReady()) {
 			SetState(STATES.JUMPING);
-			AddJumpForce(this.data.maxForce * this.data.forceRatio);
+			AddJumpForce(data.maxForce * Mathf.Max(data.forceRatio, data.minForceRatio));
 		}
 	}
 
@@ -84,13 +138,18 @@ public class Player : MonoBehaviour {
 	}
 
 	public void IncreaseForceRatio() {
-		SetForceRatio(data.forceRatio + data.speed * Time.deltaTime);
+		if(IsReady())
+			SetForceRatio(data.forceRatio + data.speed * Time.deltaTime);
 	}
 
 	public bool IsJumping() { return this.state == STATES.JUMPING; }
 	public bool IsFalling() { return this.state == STATES.FALLING; }
 	public bool IsLanding() { return this.state == STATES.LANDING; }
+	public bool IsIdling() { return this.state == STATES.IDLE; }
+	public bool IsMoving() { return this.state == STATES.MOVING; }
 	public bool IsReady() { return this.state == STATES.READY; }
+
+	public bool IsDead() { return this.state == STATES.DEAD; }
 
 	void AddJumpForce(Vector2 force) {
 		this.forceLength += force.magnitude;
@@ -99,16 +158,21 @@ public class Player : MonoBehaviour {
 
 	private void OnCollisionEnter2D(Collision2D other) {
 		if(other.gameObject.tag.Equals("Ground")) {
+			Platform hitPlatform = other.gameObject.GetComponentInParent<Platform>();
+			hitPlatform.HidePerfectZone();
+			hitPlatform.SetColor(data.color);
+			destPos = new Vector3(hitPlatform.transform.position.x, transform.position.y, transform.position.z);
+			Debug.Log("Dest Pos " + destPos);
 			SetState(STATES.LANDING);
 			ScoreEvent.Raise();
-			HitGroundEvent.Raise();
-		} else if(other.gameObject.tag.Equals("PerfectZone")) {
-			SetState(STATES.LANDING);
+		} else if (other.gameObject.tag.Equals("DeadZone") && !IsDead()) {
+			SetState(STATES.DEAD);
+		}
+	}
+
+	private void OnTriggerEnter2D(Collider2D other) {
+		if(other.gameObject.tag.Equals("PerfectZone")) {
 			PerfectEvent.Raise();
-		} else if (other.gameObject.tag.Equals("DeadZone")) {
-			Vector2 pos = this.transform.position;
-			GameObject.Instantiate(this.DeadFX, pos, Quaternion.identity);
-			gameObject.SetActive(false);
 		}
 	}
 

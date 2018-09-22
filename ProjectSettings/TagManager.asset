@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - DeadZone
+  - PerfectZone
   layers:
   - Default
   - TransparentFX
@@ -42,6 +43,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Trail
+    uniqueID: 1451126819
+    locked: 0
+  - name: player
+    uniqueID: 2009967821
     locked: 0
   - name: Partical
     uniqueID: 89157787

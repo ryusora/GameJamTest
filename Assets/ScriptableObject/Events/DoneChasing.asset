@@ -8,12 +8,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1586c18fea544814aaa5a51cc3422342, type: 3}
-  m_Name: PlayerData
+  m_Script: {fileID: 11500000, guid: 2cf0f626350a3da4d9117cd78c237361, type: 3}
+  m_Name: DoneChasing
   m_EditorClassIdentifier: 
-  maxForce: {x: 300, y: 1500}
-  dropForce: {x: 0, y: -100}
-  minForceRatio: 0.4
-  speed: 1
-  forceRatio: 0
-  color: {r: 0.20518868, g: 0.77309805, b: 0.8207547, a: 1}

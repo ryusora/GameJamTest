@@ -1,17 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+
+[CreateAssetMenu(fileName = "ScoreData", menuName = "Scriptable/ScoreData")]
 public class ScoreData : ScriptableObject {
-#if UNITY_EDITOR
-    [MenuItem("Menu/Scriptable/ScoreData")]
-    public static void CreateAsset()
-    {
-        ScriptableObjectUtility.CreateAsset<ScoreData>();
-    }
-#endif
     private int score;
     private int bestScore;
     const string BEST_SCORE = "BestScore";
@@ -28,7 +20,6 @@ public class ScoreData : ScriptableObject {
         this.score += score;
         if (this.score > this.bestScore)
             this.bestScore = this.score;
-        Debug.Log("New Score: " + this.score);
     }
 
     public void Reset() {
