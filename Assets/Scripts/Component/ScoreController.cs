@@ -35,7 +35,8 @@ public class ScoreController : MonoBehaviour {
 
 	void UpdateScoreText() {
 		scoreText.text = scoreData.GetScore().ToString();
-		scoreText.gameObject.GetComponent<Animator>().SetTrigger("Scoring");
+		if(scoreText.IsActive())
+			scoreText.gameObject.GetComponent<Animator>().SetTrigger("Scoring");
 	}
 
 	const string BEST_SCORE = "Best Score: ";

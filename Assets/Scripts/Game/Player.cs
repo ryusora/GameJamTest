@@ -15,8 +15,11 @@ public class Player : MonoBehaviour {
 	}
 
 	public PlayerData data;
-	public GameObject DeadFX;
 	public SpriteRenderer spriteRenderer;
+	public GameObject DeadFX;
+	[Space]
+	[Tooltip("Waiting Time for switching from landing to idling")]
+	public float waitTime = 0.5f;
 	[Space]
 	public GameEvent ScoreEvent;
 	public GameEvent PerfectEvent;
@@ -24,17 +27,16 @@ public class Player : MonoBehaviour {
 	public FloatEvent PowerChangedEvent;
 	public GameEvent GameOverEvent;
 
-	// Use this for initialization
-	private float forceLength;
 	private Rigidbody2D rigBody2D;
 	private STATES state;
 	private float previousY;
 	private Animator animator;
 	private Vector3 destPos;
+
+	// Use this for initialization
 	void Start () {
 		this.rigBody2D = GetComponent<Rigidbody2D>();
 		this.animator = GetComponent<Animator>();
-		this.forceLength = 0;
 		this.SetState(STATES.FALLING);
 	}
 
@@ -42,30 +44,12 @@ public class Player : MonoBehaviour {
 		spriteRenderer.color = data.color;
 	}
 
-	void StartMovingToCenter() {
-		StartCoroutine(MoveToCenter());
+	void StartWaitForIdling() {
+		StartCoroutine(WaitForIdling());
 	}
 
-	IEnumerator MoveToCenter() {
-		yield return new WaitForSeconds(0.5f);
-		// float distance = (destPos - transform.position).normalized.magnitude;
-		// Vector3 oldPos = transform.position;
-		// while(Mathf.Abs(destPos.x - transform.position.x) > 0.1f) {
-		// 	Debug.Log("[Distance] " + Mathf.Abs(destPos.x - transform.position.x));
-		// 	if(IsDead()) {
-		// 		Debug.Log("Break Move To Center");
-		// 		yield break; // return when dead
-		// 	}
-		// 	if(!IsMoving()) {
-		// 		SetState(STATES.MOVING);
-		// 	}
-		// 	ticker += Time.deltaTime;
-		// 	Vector3 newPos = Vector3.Lerp(oldPos, destPos, Mathf.Min(ticker/distance, 1));
-		// 	transform.Translate(newPos.x - transform.position.x, 0, 0);
-		// 	animator.ResetTrigger("Move");
-		// 	animator.SetTrigger("Move");
-		// 	yield return null;
-		// }
+	IEnumerator WaitForIdling() {
+		yield return new WaitForSeconds(waitTime);
 		SetState(STATES.IDLE);
 	}
 
@@ -81,15 +65,15 @@ public class Player : MonoBehaviour {
 
 			case STATES.LANDING:
 				animator.SetTrigger("Land");
-				this.forceLength = 0;
 				SetForceRatio(0);
 				HitGroundEvent.Raise();
-				StartMovingToCenter();
+				StartWaitForIdling();
 				break;
 
 			case STATES.JUMPING:
 				animator.SetTrigger("Jump");
 				this.previousY = this.transform.position.y;
+				this.rigBody2D.AddForce(data.maxForce * Mathf.Max(data.forceRatio, data.minForceRatio));
 				break;
 
 			case STATES.FALLING:
@@ -112,6 +96,15 @@ public class Player : MonoBehaviour {
 		}
 	}
 
+	public bool IsJumping() { return this.state == STATES.JUMPING; }
+	public bool IsFalling() { return this.state == STATES.FALLING; }
+	public bool IsLanding() { return this.state == STATES.LANDING; }
+	public bool IsIdling() { return this.state == STATES.IDLE; }
+	public bool IsMoving() { return this.state == STATES.MOVING; }
+	public bool IsReady() { return this.state == STATES.READY; }
+
+	public bool IsDead() { return this.state == STATES.DEAD; }
+
 	void ResetAllTriggers() {
 		animator.ResetTrigger("Ready");
 		animator.ResetTrigger("Land");
@@ -122,14 +115,11 @@ public class Player : MonoBehaviour {
 	}
 
 	public void Ready() {
-		SetState(STATES.READY);
+		if(IsIdling()) SetState(STATES.READY);
 	}
 
-	public void StartJump() {
-		if(IsReady()) {
-			SetState(STATES.JUMPING);
-			AddJumpForce(data.maxForce * Mathf.Max(data.forceRatio, data.minForceRatio));
-		}
+	public void Jump() {
+		if(IsReady()) SetState(STATES.JUMPING);
 	}
 
 	public void SetForceRatio(float value) {
@@ -138,42 +128,7 @@ public class Player : MonoBehaviour {
 	}
 
 	public void IncreaseForceRatio() {
-		if(IsReady())
-			SetForceRatio(data.forceRatio + data.speed * Time.deltaTime);
-	}
-
-	public bool IsJumping() { return this.state == STATES.JUMPING; }
-	public bool IsFalling() { return this.state == STATES.FALLING; }
-	public bool IsLanding() { return this.state == STATES.LANDING; }
-	public bool IsIdling() { return this.state == STATES.IDLE; }
-	public bool IsMoving() { return this.state == STATES.MOVING; }
-	public bool IsReady() { return this.state == STATES.READY; }
-
-	public bool IsDead() { return this.state == STATES.DEAD; }
-
-	void AddJumpForce(Vector2 force) {
-		this.forceLength += force.magnitude;
-		this.rigBody2D.AddForce(force);
-	}
-
-	private void OnCollisionEnter2D(Collision2D other) {
-		if(other.gameObject.tag.Equals("Ground")) {
-			Platform hitPlatform = other.gameObject.GetComponentInParent<Platform>();
-			hitPlatform.HidePerfectZone();
-			hitPlatform.SetColor(data.color);
-			destPos = new Vector3(hitPlatform.transform.position.x, transform.position.y, transform.position.z);
-			Debug.Log("Dest Pos " + destPos);
-			SetState(STATES.LANDING);
-			ScoreEvent.Raise();
-		} else if (other.gameObject.tag.Equals("DeadZone") && !IsDead()) {
-			SetState(STATES.DEAD);
-		}
-	}
-
-	private void OnTriggerEnter2D(Collider2D other) {
-		if(other.gameObject.tag.Equals("PerfectZone")) {
-			PerfectEvent.Raise();
-		}
+		if(IsReady()) SetForceRatio(data.forceRatio + data.speed * Time.deltaTime);
 	}
 
 	void Update() {
@@ -184,6 +139,25 @@ public class Player : MonoBehaviour {
 				SetState(STATES.FALLING);
 			}
 			this.previousY = this.transform.position.y;
+		}
+	}
+
+	private void OnCollisionEnter2D(Collision2D other) {
+		if(other.gameObject.tag.Equals("Ground")) {
+			Platform hitPlatform = other.gameObject.GetComponentInParent<Platform>();
+			hitPlatform.HidePerfectZone();
+			hitPlatform.SetColor(data.color);
+			destPos = new Vector3(hitPlatform.transform.position.x, transform.position.y, transform.position.z);
+			SetState(STATES.LANDING);
+			ScoreEvent.Raise();
+		} 
+	}
+
+	private void OnTriggerEnter2D(Collider2D other) {
+		if(other.gameObject.tag.Equals("PerfectZone")) {
+			PerfectEvent.Raise();
+		} else if (other.gameObject.tag.Equals("DeadZone") && !IsDead()) {
+			SetState(STATES.DEAD);
 		}
 	}
 }

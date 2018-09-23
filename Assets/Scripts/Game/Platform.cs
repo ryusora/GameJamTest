@@ -9,11 +9,9 @@ public class Platform : MonoBehaviour {
 	public void HidePerfectZone() {
 		perfectZone.SetActive(false);
 	}
-
 	public void ShowPerfectZone() {
 		perfectZone.SetActive(true);
 	}
-
 	public void SetColor(Color color) {
 		cubeSR.color = color;
 	}

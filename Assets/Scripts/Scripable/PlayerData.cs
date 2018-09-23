@@ -12,5 +12,4 @@ public class PlayerData : ScriptableObject {
     [HideInInspector]
     public float forceRatio;
     public Color color;
-
 }

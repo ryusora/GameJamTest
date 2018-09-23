@@ -9,14 +9,14 @@ public class GameOver : MonoBehaviour {
 	public Text bestScore;
 
 	public ScoreData scoreData;
-
+	const string YOUR_BEST = "Your best: ";
 	private void OnEnable() {
 		score.text = scoreData.GetScore().ToString();
-		bestScore.text = "Your best: " + scoreData.GetBestScore();
+		bestScore.text = YOUR_BEST + scoreData.GetBestScore();
 		scoreData.SaveScore();
 	}
 
 	public void OnHomePressed() {
-		SceneManager.LoadScene(0);
+		SceneManager.LoadScene("Game");
 	}
 }

@@ -4,9 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [System.Serializable]
-public class UnityFloatEvent : UnityEvent<float> {
-	
-}
+public class UnityFloatEvent : UnityEvent<float> {}
 
 public class FloatEventListener : MonoBehaviour {
 	[Tooltip("Event to register with.")]

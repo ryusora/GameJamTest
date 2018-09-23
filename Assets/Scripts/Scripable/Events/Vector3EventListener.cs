@@ -4,9 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 [System.Serializable]
-public class UnityVector3Event : UnityEvent<Vector3> {
-	
-}
+public class UnityVector3Event : UnityEvent<Vector3> {}
 
 public class Vector3EventListener : MonoBehaviour {
 	[Tooltip("Event to register with.")]

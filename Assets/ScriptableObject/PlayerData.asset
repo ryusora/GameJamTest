@@ -16,4 +16,4 @@ MonoBehaviour:
   minForceRatio: 0.4
   speed: 1
   forceRatio: 0
-  color: {r: 0.20518868, g: 0.77309805, b: 0.8207547, a: 1}
+  color: {r: 0.1462264, g: 1, b: 0.43918794, a: 1}

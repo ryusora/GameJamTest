@@ -20,34 +20,32 @@ public class PlatformsController : MonoBehaviour {
 	void Start () {
 		lastPosition = this.transform.position;
 		InitFirstPlatform();
-		for(int i = 1, length = platformsPool.Length; i < length; ++i) {
+		for(int i = currentIndex, length = platformsPool.Length; i < length; ++i) {
 			SpawnNextPosition();
 		}
 	}
 
 	void InitFirstPlatform() {
-		Platform platform = GetNextPlatform(); // first platform
+		Platform platform = GetPlatform();
 		platform.transform.position = lastPosition;
-		Debug.Log("First platform position " + platform.transform.position);
 		platform.HidePerfectZone();
 		UpdateColor(platform); 
 	}
 
 	void SpawnNextPosition() {
-		Platform nextPlatform = GetNextPlatform();
-		Vector3 nextPosition = new Vector3(lastPosition.x + Random.Range(minPosition.x, maxPosition.x), lastPosition.y + Random.Range(minPosition.y, maxPosition.y), lastPosition.z);
-		nextPlatform.transform.position = nextPosition;
-		nextPlatform.ShowPerfectZone();
-		UpdateColor(nextPlatform);
-		Debug.Log("Platform " + currentIndex + " position " + nextPlatform.transform.position);
-		lastPosition = nextPosition;
+		Platform platform = GetPlatform();
+		Vector3 position = new Vector3(lastPosition.x + Random.Range(minPosition.x, maxPosition.x), lastPosition.y + Random.Range(minPosition.y, maxPosition.y), lastPosition.z);
+		platform.transform.position = position;
+		platform.ShowPerfectZone();
+		UpdateColor(platform);
+		lastPosition = position;
 	}
 
 	void UpdateColor(Platform platform) {
 		platform.SetColor(colorsPool[Random.Range(0, colorsPool.Length - 1)]);
 	}
 
-	Platform GetNextPlatform() {
+	Platform GetPlatform() {
 		Platform platform = platformsPool[currentIndex];
 		currentIndex = (currentIndex + 1)%platformsPool.Length;
 		return platform;

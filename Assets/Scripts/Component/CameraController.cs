@@ -6,6 +6,10 @@ public class CameraController : MonoBehaviour {
 	public Transform follower;
 	public Vector3 distanceToFollower;
 	public float smoothValue = 0.5f;
+	[Space]
+	public float shakeTimer = 0.25f;
+	public float shakeAmount = 0.15f;
+	[Space]
 	public Vector3Event PositionChangedEvent; 
 	public GameEvent DoneChasingEvent;
 	private Coroutine coroutine = null;
@@ -17,37 +21,39 @@ public class CameraController : MonoBehaviour {
 	public void StartShaking() {
 		if(coroutine != null)
 			StopCoroutine(coroutine);
-		coroutine = StartCoroutine(Shaking());
+		coroutine = StartCoroutine(ShakeBeforeChaseFollower());
+	}
+
+	IEnumerator ShakeBeforeChaseFollower() {
+		yield return StartCoroutine(Shaking());
+		yield return StartCoroutine(ChaseToFollower());
+		coroutine = null;
 	}
 
 	IEnumerator Shaking() {
-		float timer = 0.25f;
-		float shakeValue = 0.15f;
-		Vector3 defaultPosition = transform.position;
+		float timer = shakeTimer;
+		Vector3 oldPosition = transform.position;
 		while(timer > 0) {
 			timer -= Time.deltaTime;
-			Vector3 position = defaultPosition;
-			position.y += shakeValue * Mathf.Cos(Random.Range(-Mathf.PI, Mathf.PI));
+			Vector3 position = oldPosition;
+			position.y += shakeAmount * Mathf.Cos(Random.Range(-Mathf.PI, Mathf.PI));
 			transform.position = position;
 			yield return null;
 		}
-		transform.position = defaultPosition;
-		yield return StartCoroutine(ChaseToFollower());
+		transform.position = oldPosition;
 	}
 
 	IEnumerator ChaseToFollower(){
-		Vector3 destPos = follower.position + distanceToFollower;
-		float distance = (destPos - transform.position).normalized.magnitude;
+		Vector3 destPosition = follower.position + distanceToFollower;
+		float distance = Vector3.Distance(destPosition, transform.position);
 		float ticker = 0;
-		Vector3 oldPos = transform.position;
-		while(Vector3.Distance(destPos, transform.position) > 0.01f) {
-			ticker += Time.deltaTime;
-			transform.position = Vector3.Lerp(oldPos, destPos, Mathf.Min(ticker/distance));
+		Vector3 oldPosition = transform.position;
+		while(Vector3.Distance(destPosition, transform.position) > 0.01f) {
+			ticker += Time.deltaTime * smoothValue;
+			transform.position = Vector3.Lerp(oldPosition, destPosition, Mathf.Min(ticker/distance));
 			PositionChangedEvent.Raise(transform.position);
 			yield return null;
 		}
-		Debug.Log("Done Chasing Follower");
 		DoneChasingEvent.Raise();
-		coroutine = null;
 	}
 }
