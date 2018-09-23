@@ -11,6 +11,8 @@ public class PlatformsController : MonoBehaviour {
 	[Tooltip("Max point between platforms")]
 	public Vector2 maxPosition;
 	public int platfromsSkip = 2;
+	[Space]
+	public ScoreData scoreData;
 
 	private Vector3 lastPosition = Vector3.zero;
 	private int currentIndex = 0;
@@ -34,6 +36,9 @@ public class PlatformsController : MonoBehaviour {
 
 	void SpawnNextPosition() {
 		Platform platform = GetPlatform();
+		MovingPattern movingComponent = platform.GetComponent<MovingPattern>();
+		if(movingComponent) movingComponent.Release();
+		
 		Vector3 position = new Vector3(lastPosition.x + Random.Range(minPosition.x, maxPosition.x), lastPosition.y + Random.Range(minPosition.y, maxPosition.y), lastPosition.z);
 		platform.transform.position = position;
 		platform.ShowPerfectZone();
@@ -41,8 +46,22 @@ public class PlatformsController : MonoBehaviour {
 		lastPosition = position;
 	}
 
+	void SpawnMovingPlatform() {
+		Platform platform = GetPlatform();
+		platform.transform.position = new Vector3(lastPosition.x + minPosition.x, lastPosition.y + minPosition.y, lastPosition.z);
+		lastPosition = new Vector3(lastPosition.x + maxPosition.x, lastPosition.y + maxPosition.y, lastPosition.z);
+		platform.ShowPerfectZone();
+		// moving pattern
+		MovingPattern component = platform.gameObject.AddComponent<MovingPattern>();
+		component.SetUpPattern(platform.transform.position, lastPosition, 1.0f, 1.5f);
+		component.StartMoving();
+		UpdateColor(platform);
+	}
+
 	void UpdateColor(Platform platform) {
 		platform.SetColor(colorsPool[Random.Range(0, colorsPool.Length - 1)]);
+		platform.StopColoringCoroutine();
+		platform.ResetHighLight();
 	}
 
 	Platform GetPlatform() {
@@ -52,7 +71,9 @@ public class PlatformsController : MonoBehaviour {
 	}
 	public void OnDoneChasing() { // listener for camera done chasing
 		if(platfromsSkip-- > 0) return;
-		SpawnNextPosition();
+		int percentage = Random.Range(0, 100);
+		if(percentage < scoreData.GetBestScore()) SpawnMovingPlatform();
+		else SpawnNextPosition();
 	}
 
 }

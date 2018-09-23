@@ -16,6 +16,8 @@ public class Player : MonoBehaviour {
 
 	public PlayerData data;
 	public SpriteRenderer spriteRenderer;
+	public ParticleSystem trailParticleSystem;
+	[Space]
 	public GameObject DeadFX;
 	[Space]
 	[Tooltip("Waiting Time for switching from landing to idling")]
@@ -26,12 +28,13 @@ public class Player : MonoBehaviour {
 	public GameEvent HitGroundEvent;
 	public FloatEvent PowerChangedEvent;
 	public GameEvent GameOverEvent;
+	public GameEvent HitMovingPlatform;
+	public GameEvent PlayerJump;
 
 	private Rigidbody2D rigBody2D;
 	private STATES state;
 	private float previousY;
 	private Animator animator;
-	private Vector3 destPos;
 
 	// Use this for initialization
 	void Start () {
@@ -68,9 +71,12 @@ public class Player : MonoBehaviour {
 				SetForceRatio(0);
 				HitGroundEvent.Raise();
 				StartWaitForIdling();
+				if(trailParticleSystem.isPlaying) trailParticleSystem.Stop();
 				break;
 
 			case STATES.JUMPING:
+				if(!trailParticleSystem.isPlaying) trailParticleSystem.Play();
+				PlayerJump.Raise();
 				animator.SetTrigger("Jump");
 				this.previousY = this.transform.position.y;
 				this.rigBody2D.AddForce(data.maxForce * Mathf.Max(data.forceRatio, data.minForceRatio));
@@ -146,8 +152,8 @@ public class Player : MonoBehaviour {
 		if(other.gameObject.tag.Equals("Ground")) {
 			Platform hitPlatform = other.gameObject.GetComponentInParent<Platform>();
 			hitPlatform.HidePerfectZone();
-			hitPlatform.SetColor(data.color);
-			destPos = new Vector3(hitPlatform.transform.position.x, transform.position.y, transform.position.z);
+			if(hitPlatform.GetComponent<MovingPattern>() != null)
+				HitMovingPlatform.Raise();
 			SetState(STATES.LANDING);
 			ScoreEvent.Raise();
 		} 
@@ -155,6 +161,7 @@ public class Player : MonoBehaviour {
 
 	private void OnTriggerEnter2D(Collider2D other) {
 		if(other.gameObject.tag.Equals("PerfectZone")) {
+			other.gameObject.GetComponentInParent<Platform>().StartColoring(data.color, 1.0f);
 			PerfectEvent.Raise();
 		} else if (other.gameObject.tag.Equals("DeadZone") && !IsDead()) {
 			SetState(STATES.DEAD);

@@ -13,9 +13,19 @@ public class CameraController : MonoBehaviour {
 	public Vector3Event PositionChangedEvent; 
 	public GameEvent DoneChasingEvent;
 	private Coroutine coroutine = null;
-	private 
+	private bool isHitMovingPlatform = false;
 	// Use this for initialization
 	void Start () {
+	}
+
+	public void HitMovingPlatform() {
+		isHitMovingPlatform = true;
+	}
+
+	public void StopFollowingPlayer() {
+		if(coroutine != null)
+			StopCoroutine(coroutine);
+		isHitMovingPlatform = false;
 	}
 
 	public void StartShaking() {
@@ -52,6 +62,8 @@ public class CameraController : MonoBehaviour {
 			ticker += Time.deltaTime * smoothValue;
 			transform.position = Vector3.Lerp(oldPosition, destPosition, Mathf.Min(ticker/distance));
 			PositionChangedEvent.Raise(transform.position);
+			if(isHitMovingPlatform) 
+				destPosition = follower.position + distanceToFollower;
 			yield return null;
 		}
 		DoneChasingEvent.Raise();
