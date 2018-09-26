@@ -44,18 +44,20 @@ public class PlatformsController : MonoBehaviour {
 		platform.ShowPerfectZone();
 		UpdateColor(platform);
 		lastPosition = position;
+		isMovingPreviously = false;
 	}
 
 	void SpawnMovingPlatform() {
 		Platform platform = GetPlatform();
-		platform.transform.position = new Vector3(lastPosition.x + minPosition.x, lastPosition.y + minPosition.y, lastPosition.z);
-		lastPosition = new Vector3(lastPosition.x + maxPosition.x, lastPosition.y + maxPosition.y, lastPosition.z);
+		platform.transform.position = new Vector3(lastPosition.x + minPosition.x, lastPosition.y + Random.Range(minPosition.y, maxPosition.y), lastPosition.z);
+		lastPosition = new Vector3(lastPosition.x + maxPosition.x, lastPosition.y + Random.Range(minPosition.y, maxPosition.y), lastPosition.z);
 		platform.ShowPerfectZone();
 		// moving pattern
 		MovingPattern component = platform.gameObject.AddComponent<MovingPattern>();
-		component.SetUpPattern(platform.transform.position, lastPosition, 1.0f, 1.5f);
+		component.SetUpPattern(platform.transform.position, lastPosition, Random.Range(1.0f, 2.5f), Random.Range(1.5f, 3.5f));
 		component.StartMoving();
 		UpdateColor(platform);
+		isMovingPreviously = true;
 	}
 
 	void UpdateColor(Platform platform) {
@@ -69,10 +71,11 @@ public class PlatformsController : MonoBehaviour {
 		currentIndex = (currentIndex + 1)%platformsPool.Length;
 		return platform;
 	}
+	private bool isMovingPreviously = false;
 	public void OnDoneChasing() { // listener for camera done chasing
 		if(platfromsSkip-- > 0) return;
 		int percentage = Random.Range(0, 100);
-		if(percentage < scoreData.GetBestScore()) SpawnMovingPlatform();
+		if(percentage < scoreData.GetBestScore() && !isMovingPreviously) SpawnMovingPlatform();
 		else SpawnNextPosition();
 	}
 

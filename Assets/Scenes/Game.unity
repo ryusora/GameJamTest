@@ -1112,7 +1112,6 @@ MonoBehaviour:
     type: 2}
   DoneChasingEvent: {fileID: 11400000, guid: 5b12770f1357a7f4baafb5295f56db0c, type: 2}
   isHitMovingPlatform: 0
-  isInCoroutine: 0
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

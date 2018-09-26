@@ -13,7 +13,6 @@ public class CameraController : MonoBehaviour {
 	public Vector3Event PositionChangedEvent; 
 	public GameEvent DoneChasingEvent;
 	private Coroutine coroutine = null;
-	
 	[SerializeField]
 	private bool isHitMovingPlatform = false;
 	// Use this for initialization
