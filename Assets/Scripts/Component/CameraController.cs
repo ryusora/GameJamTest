@@ -13,6 +13,8 @@ public class CameraController : MonoBehaviour {
 	public Vector3Event PositionChangedEvent; 
 	public GameEvent DoneChasingEvent;
 	private Coroutine coroutine = null;
+	
+	[SerializeField]
 	private bool isHitMovingPlatform = false;
 	// Use this for initialization
 	void Start () {
@@ -58,7 +60,7 @@ public class CameraController : MonoBehaviour {
 		float distance = Vector3.Distance(destPosition, transform.position);
 		float ticker = 0;
 		Vector3 oldPosition = transform.position;
-		while(Vector3.Distance(destPosition, transform.position) > 0.01f) {
+		while(Vector3.Distance(destPosition, transform.position) > 0.01f || isHitMovingPlatform) {
 			ticker += Time.deltaTime * smoothValue;
 			transform.position = Vector3.Lerp(oldPosition, destPosition, Mathf.Min(ticker/distance));
 			PositionChangedEvent.Raise(transform.position);

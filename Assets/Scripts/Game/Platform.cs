@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Platform : MonoBehaviour {
-	public SpriteRenderer cubeSR;
 	public GameObject perfectZone;
 	public MeshRenderer meshRenderer;
 
@@ -16,7 +15,6 @@ public class Platform : MonoBehaviour {
 		perfectZone.SetActive(true);
 	}
 	public void SetColor(Color color) {
-		cubeSR.color = color;
 		meshRenderer.material.SetColor("_mainColor", color);
 	}
 

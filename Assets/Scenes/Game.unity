@@ -1111,6 +1111,8 @@ MonoBehaviour:
   PositionChangedEvent: {fileID: 11400000, guid: 60a9c3edeaa6f9440bbcd270de90274f,
     type: 2}
   DoneChasingEvent: {fileID: 11400000, guid: 5b12770f1357a7f4baafb5295f56db0c, type: 2}
+  isHitMovingPlatform: 0
+  isInCoroutine: 0
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -3087,6 +3089,15 @@ Prefab:
     - target: {fileID: 4511192224519728, guid: 993dd93f6c751b643b72d4582ee149d6, type: 2}
       propertyPath: m_RootOrder
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1197270151349356, guid: 993dd93f6c751b643b72d4582ee149d6, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 50226421513085238, guid: 993dd93f6c751b643b72d4582ee149d6,
+        type: 2}
+      propertyPath: m_Material
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 993dd93f6c751b643b72d4582ee149d6, type: 2}

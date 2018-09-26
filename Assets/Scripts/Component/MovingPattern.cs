@@ -41,6 +41,18 @@ public class MovingPattern : MonoBehaviour {
 			StopCoroutine(coroutine);
 	}
 
+	private void OnTriggerEnter2D(Collider2D other) {
+		if(other.gameObject.tag.Equals("Player")) {
+			other.transform.parent = this.transform;
+		}
+	}
+
+	private void OnTriggerExit2D(Collider2D other) {
+		if(other.gameObject.tag.Equals("Player")) {
+			other.transform.parent = null;
+		}
+	}
+
 	public void Release() {
 		StopMoving();
 		Destroy(this);
